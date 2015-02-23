@@ -21,5 +21,12 @@ tri = Delaunay(delaunay_points)
 
 plt.triplot(delaunay_points[:,0], delaunay_points[:,1], tri.simplices.copy())
 plt.plot(delaunay_points[:,0], delaunay_points[:,1], 'o')
+
+color = 0;
+
+for tri in delaunay_points[tri.simplices]:
+    col = img[tri[0][0]][tri[0][1]][0]
+    cv2.fillPoly(img, np.array([tri], np.int32), int(col))
+
 plt.imshow(img)
 plt.show()
