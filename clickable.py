@@ -4,32 +4,29 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
+import triangle_roi_utility as roi_util
 
 keypoints = []
 
-def create_triangle_linear_gradient(triangle, colorFrom, colorTo):
-    
-    return
-
-def create_rect_linear_gradient(mat, colorFrom, colorTo):
-    # opencv is row-major so dimensions are height, width.  fucked up right?
-    width = mat.shape[1]
-    height = mat.shape[0]
-
-    #http://stackoverflow.com/questions/25622612/linear-color-gradient-in-opencv
-    def get_color_val(row, height, colorValFrom, colorValTo):
-        return (row*colorValFrom+(height-row)*colorValTo) / height
-
-    for row in range(0, height):
-        colorR = get_color_val(row, height, colorFrom[0], colorTo[0])
-        colorG = get_color_val(row, height, colorFrom[1], colorTo[1])
-        colorB = get_color_val(row, height, colorFrom[2], colorTo[2])
-
-        color = colorR, colorG, colorB
-
-        for col in range(0, width):
-            mat[row][col] = color
-
+#def create_rect_linear_gradient(mat, colorFrom, colorTo):
+#    # opencv is row-major so dimensions are height, width.  fucked up right?
+#    width = mat.shape[1]
+#    height = mat.shape[0]
+#
+#    #http://stackoverflow.com/questions/25622612/linear-color-gradient-in-opencv
+#    def get_color_val(row, height, colorValFrom, colorValTo):
+#        return (row*colorValFrom+(height-row)*colorValTo) / height
+#
+#    for row in range(0, height):
+#        colorR = get_color_val(row, height, colorFrom[0], colorTo[0])
+#        colorG = get_color_val(row, height, colorFrom[1], colorTo[1])
+#        colorB = get_color_val(row, height, colorFrom[2], colorTo[2])
+#
+#        color = colorR, colorG, colorB
+#
+#        for col in range(0, width):
+#            mat[row][col] = color
+#
 def store_point(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         keypoints.append([x,y])
@@ -67,11 +64,13 @@ def do_delaunay():
                 avgb = avg[2]
 
                 col = (int(avgr), int(avgg), int(avgb))
-                cv2.fillPoly(img, np.array([triangle], np.int32), col)
+                print triangle
+                roi_util.color_triangle_in_image(triangle, img)
+#                cv2.fillPoly(img, np.array([triangle], np.int32), col)
             except IndexError:
                 print '' 
 
-img = cv2.imread('knightley.jpg', -1)
+img = cv2.imread('shibe.jpg', -1)
 cv2.namedWindow('image')
 cv2.setMouseCallback('image', store_point)
 
