@@ -71,21 +71,13 @@ def do_delaunay():
             except IndexError:
                 print '' 
 
-m = np.zeros((200, 300, 3), dtype=np.uint8)
-create_rect_linear_gradient(m, [255, 0, 0], [0, 0, 255])
+img = cv2.imread('knightley.jpg', -1)
 cv2.namedWindow('image')
+cv2.setMouseCallback('image', store_point)
 
-while True:
-    cv2.imshow('image', m)
-    cv2.waitKey(20)
+while(True):
+    cv2.imshow('image', img)
+    if cv2.waitKey(20) & 0xFF == 27:
+        break
 
-#img = cv2.imread('knightley.jpg', -1)
-#cv2.namedWindow('image')
-#cv2.setMouseCallback('image', store_point)
-#
-#while(True):
-#    cv2.imshow('image', img)
-#    if cv2.waitKey(20) & 0xFF == 27:
-#        break
-#
-#cv2.destroyAllWindows()
+cv2.destroyAllWindows()
