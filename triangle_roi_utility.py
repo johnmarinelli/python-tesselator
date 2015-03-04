@@ -1,6 +1,23 @@
 import cv2
 import numpy as np
 
+# corners must be an np.array([ [[x,y],[z,b]] ])
+def get_masked_image(corners, original):
+    mask = np.zeros(original.shape, dtype=np.uint8)
+    roi_corners = np.array(corners, dtype=np.int32)
+    white = 255, 255, 255
+    cv2.fillPoly(mask, roi_corners, white)
+    return cv2.bitwise_and(original, mask)
+
+def get_roi_from_masked_image(corners, masked_image):
+    rect_coords = get_rect_coords_from_points(corners)
+    left = rect_coords[0]
+    right = rect_coords[2]
+    top = rect_coords[1]
+    bottom = rect_coords[3]
+
+    return masked_image[top:bottom, left:right]
+
 #points: [ [] ... ]
 def get_rect_coords_from_points(points):
     # find leftmost point
@@ -25,32 +42,15 @@ def create_rect_linear_gradient(mat, colorFrom, colorTo, maskColor):
         return (row*colorValFrom+(height-row)*colorValTo) / height
 
     for row in range(0, height):
-        colorR = get_color_val(row, height, colorFrom[0], colorTo[0])
+        colorB = get_color_val(row, height, colorFrom[0], colorTo[0])
         colorG = get_color_val(row, height, colorFrom[1], colorTo[1])
-        colorB = get_color_val(row, height, colorFrom[2], colorTo[2])
+        colorR = get_color_val(row, height, colorFrom[2], colorTo[2])
 
-        color = colorR, colorG, colorB
+        color = colorB, colorG, colorR
 
         for col in range(0, width):
             if not np.array_equal(maskColor, mat[row][col]):
                 mat[row][col] = color
-
-# corners must be an np.array([ [[x,y],[z,b]] ])
-def get_masked_image(corners, original):
-    mask = np.zeros(original.shape, dtype=np.uint8)
-    roi_corners = np.array(corners, dtype=np.int32)
-    white = 255, 255, 255
-    cv2.fillPoly(mask, roi_corners, white)
-    return cv2.bitwise_and(original, mask)
-
-def get_roi_from_masked_image(corners, masked_image):
-    rect_coords = get_rect_coords_from_points(corners)
-    left = rect_coords[0]
-    right = rect_coords[2]
-    top = rect_coords[1]
-    bottom = rect_coords[3]
-
-    return masked_image[top:bottom, left:right]
 
 def insert_roi_into_image(roi, image, corners, mask_color):
     rect_coords = get_rect_coords_from_points(corners)
@@ -70,14 +70,19 @@ def color_triangle_in_image(points, image):
     masked_image = get_masked_image(np.array([points]), image)
     roi = get_roi_from_masked_image(points, masked_image)
 
+#    leftmost_point = min(points, key = lambda item: item[0])
+#    rightmost_point = max(points, key = lambda item: item[0])
+#
+#    leftmost_color = image[leftmost_point[0], leftmost_point[1]]
+#    rightmost_color = image[rightmost_point[0], rightmost_point[1]]
+    
     leftmost_point = min(points, key = lambda item: item[0])
     rightmost_point = max(points, key = lambda item: item[0])
-
-    leftmost_color = image[leftmost_point[0], leftmost_point[1]]
-    rightmost_color = image[rightmost_point[0], rightmost_point[1]]
+    
+    leftmost_color = image[leftmost_point[1], leftmost_point[0]]
+    rightmost_color = image[rightmost_point[1], rightmost_point[0]]
 
     mask_color = (0, 0, 0)
-
     print "LEFTMOST POINT: {}".format(leftmost_point)
     print "LEFTMOST COLOR: {}".format(leftmost_color)
     
